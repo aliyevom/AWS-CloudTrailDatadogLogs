@@ -1,0 +1,576 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<!-- Include Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
+
+
+
+<style>
+  table {
+    border-collapse: collapse;
+    width: 1900%;
+  }
+  th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 4px solid #3553bf;
+  }
+  tr:hover {
+    background-color: hsl(0, 0%, 96%);
+  }
+  th {
+    background-color: #337ab7;
+    color: white;
+  }
+  .green-circle {
+  background-color: green;
+  border-radius: 150%;
+}
+ /* Define the animation */
+ @keyframes color-change {
+    0% {
+      color: white;
+    }
+    50% {
+      color: #428bca;
+    }
+    100% {
+      color: white;
+    }
+  }
+
+  /* Apply the animation to the navbar brand */
+  .navbar-brand {
+    animation: color-change 5s infinite;
+  }
+  *{
+    margin: 0;
+    padding: 0;
+    -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+  }
+  
+  h1{
+    font-size: 2.5rem;
+    font-family: 'Montserrat';
+    font-weight: normal;
+    color: #444;
+    text-align: center;
+    margin: 2rem 0;
+  }
+  
+  .wrapper{
+    width: 90%;
+    margin: 0 auto;
+    max-width: 590rem;
+  }
+  #graph {
+  display: inline-block;
+  vertical-align: top;
+  width: 400px;
+  height: 300px;
+  
+}
+
+
+
+  
+  .col{
+    width: calc(1% - 1rem);
+    margin: 1rem;
+    cursor: pointer;
+  }
+
+  .container{
+    -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+      -webkit-perspective: 1000px;
+              perspective: 1000px;
+  }
+  
+  .front,
+  .back{
+    background-size: cover;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.25);
+    border-radius: 10px;
+      background-position: center;
+      -webkit-transition: -webkit-transform .7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transition: -webkit-transform .7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      -o-transition: transform .7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transition: transform .7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transition: transform .7s cubic-bezier(0.4, 0.2, 0.2, 1), -webkit-transform .7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+      text-align: center;
+      min-height: 380px;
+      height: auto;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1.5rem;
+      width: 329px;
+  }
+  
+  .back{
+    background: #cedce7;
+    background: -webkit-linear-gradient(45deg,  #cedce7 0%,#596a72 100%);
+    background: -o-linear-gradient(45deg,  #cedce7 0%,#596a72 100%);
+    background: linear-gradient(45deg,  #cedce7 0%,#596a72 100%);
+  }
+  
+  .front:after{
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      content: '';
+      display: block;
+      opacity: .6;
+      background-color: #000;
+      -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+      border-radius: 10px;
+  }
+  .container:hover .front,
+  .container:hover .back{
+      -webkit-transition: -webkit-transform .7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transition: -webkit-transform .7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      -o-transition: transform .7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transition: transform .7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transition: transform .7s cubic-bezier(0.4, 0.2, 0.2, 1), -webkit-transform .7s cubic-bezier(0.4, 0.2, 0.2, 1);
+  }
+  
+  .back{
+  position: absolute;
+  top: 0;
+  left: 24px;
+  width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+  .back {
+    width: 60%;
+  }
+}
+
+  
+  .inner{
+      -webkit-transform: translateY(-50%) translateZ(60px) scale(0.94);
+              transform: translateY(-50%) translateZ(60px) scale(0.94);
+      top: 50%;
+      position: absolute;
+      left: 0;
+      width: 100%;
+      padding: 2rem;
+      -webkit-box-sizing: border-box;
+              box-sizing: border-box;
+      outline: 1px solid transparent;
+      -webkit-perspective: inherit;
+              perspective: inherit;
+      z-index: 2;
+  }
+  
+  .container .back{
+      -webkit-transform: rotateY(180deg);
+              transform: rotateY(180deg);
+      -webkit-transform-style: preserve-3d;
+              transform-style: preserve-3d;
+  }
+  
+  .container .front{
+      -webkit-transform: rotateY(0deg);
+              transform: rotateY(0deg);
+      -webkit-transform-style: preserve-3d;
+              transform-style: preserve-3d;
+  }
+  
+  .container:hover .back{
+    -webkit-transform: rotateY(0deg);
+            transform: rotateY(0deg);
+    -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+  }
+  
+  .container:hover .front{
+    -webkit-transform: rotateY(-180deg);
+            transform: rotateY(-180deg);
+    -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+  }
+  
+  .front .inner p{
+    font-size: 5rem;
+    margin-bottom: 2rem;
+    margin-right: -2.5rem;
+    position: relative;
+  }
+  
+  .front .inner p:after{
+    content: '';
+    width: 4rem;
+    height: 2px;
+    position: absolute;
+    background: #C6D4DF;
+    display: block;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    bottom: -.75rem;
+  }
+  
+  .front .inner span{
+    color: rgba(255,255,255,0.7);
+    font-family: 'Montserrat';
+    font-weight: 300;
+  }
+  
+  @media screen and (max-width: 64rem){
+    .col{
+      width: calc(33.333333% - 2rem);
+    }
+  }
+  
+  @media screen and (max-width: 48rem){
+    .col{
+      width: calc(50% - 2rem);
+    }
+  }
+  
+  @media screen and (max-width: 32rem){
+    .col{
+      width: 100%;
+      margin: 0 0 1rem -35px;
+    }
+  }
+.table-responsive {
+  overflow-x: auto;
+}
+.navbar-inverse {
+  background: linear-gradient(to right, #000000, #5a2a2a, #3b3232, #c70039, #900c3f);
+  border-bottom: 8px double #b1c7da;
+}
+
+.navbar-toggle .icon-bar {
+  background-color: #ffffff;
+}
+
+.sidebar {
+  background: linear-gradient(to bottom, #000000, #000000, #3b3232, #c70039, #900c3f);
+  background-size: cover;
+  animation: flame-gradient 1s ease infinite;
+}
+
+@keyframes flame-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+   .navbar-toggle{
+   position: relative;
+    float: right;
+    padding: 9px 10px;
+    margin-top: 8px;
+    margin-right: 22px;
+    margin-bottom: 8px;
+    background-color: transparent;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+   }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-inverse navbar-fixed-top"
+  style="background: linear-gradient(to right, #000000, #5a2a2a, #3b3232, #c70039, #900c3f);">
+  <div class="container-fluid">
+    <div class="navbar-header">
+
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+        aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar" style="background-color: #ffffff;"></span>
+        <span class="icon-bar" style="background-color: #ffffff;"></span>
+        <span class="icon-bar" style="background-color: #ffffff;"></span>
+      </button>
+      <img src="static/pics/logo__4-removebg.png" alt="logo" height="60px" width="60px">
+
+      <a class="navbar-brand" href="#">HawkinCloud</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right hidden-lg">
+
+        <li class="active"><a href="#" style="color: #ffffff;">Overview <span class="sr-only">(current)</span></a></li>
+        <li><a href="{{ url_for('charts') }}" target="popup" style="color: #ffffff;"
+            onclick="window.open('{{ url_for('charts') }}', 'popup', 'width=700, height=600'); return false;">Security
+            Group Charts </a> </li>
+        <li><a href="{{ url_for('top_events') }}" target="popup" style="color: #ffffff;"
+            onclick="window.open('{{ url_for('top_events') }}', 'popup', 'width=700, height=600'); return false;">Events
+            Charts </a> </li>
+        <li><a href="{{ url_for('logout') }}" style="color: #ffffff;">Log Out</a></li>
+      </ul>
+
+
+
+    </div>
+  </div>
+</nav>
+
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-3 col-md-2 sidebar"
+      style="background: linear-gradient(to bottom, #000000, #000000, #3b3232, #c70039, #900c3f); background-size: cover; animation: flame-gradient 3s ease infinite;">
+      <ul class="nav nav-sidebar">
+        <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+        <li><a href="{{ url_for('charts') }}" target="popup"
+            onclick="window.open('{{ url_for('charts') }}', 'popup', 'width=700, height=600'); return false;">Security
+            Group Charts </a> </li>
+        <li><a href="{{ url_for('top_events') }}" target="popup"
+            onclick="window.open('{{ url_for('top_events') }}', 'popup', 'width=700, height=600'); return false;">Events
+            Charts </a> </li>
+        <li><a href="#">Export</a></li>
+      </ul>
+      <ul class="nav nav-sidebar">
+        <li><a href="">Nav item</a></li>
+        <li><a href="">Nav item again</a></li>
+        <li><a href="">One more nav</a></li>
+        <li><a href="">Another nav item</a></li>
+        <li><a href="">More navigation</a></li>
+      </ul>
+      <ul class="nav nav-sidebar">
+        <li><a href="">Nav item again</a></li>
+        <li><a href="">One more nav</a></li>
+        <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <div id="time-left"></div>
+          <h1 class="page-header">Welcome, {{ name }}</h1>              
+<div class="wrapper">
+  <div class="cols">
+            <div class="col" ontouchstart="this.classList.toggle('hover');">
+                <div class="container">
+                    <div class="front" style="background-image: url(https://www.logicata.com/wp-content/uploads/2020/08/Amazon-EC2@4x-e1593195270371.png)">
+                        <div class="inner">
+                            <p>EC 2  <br>Istances</p>
+             
+                        </div>
+                    </div>
+                    <div class="back">
+                        <div class="inner">
+                          <div id="pie-chart"></div>
+                      </div>
+                    </div>
+                    
+
+                </div>
+            </div>
+            
+        </div>
+ </div>
+
+
+
+                   
+      
+
+
+      
+  <script>
+      function updatePieChart() {
+        // Make a request to the Flask route to get the data
+        fetch('/ec2_data')
+          .then(response => response.json())
+          .then(data => {
+            // Check if any instances are running
+            var totalInstances = data.RunInstances + data.StartInstances + data.StopInstances + data.TerminateInstances;
+            if (totalInstances == 0) {
+              // If no instances are running, display a message in the pie chart area
+              document.getElementById('pie-chart').innerHTML = '<p>No instances running</p>';
+            } else {
+              // Otherwise, create the pie chart using Plotly.js
+              var trace1 = {
+                values: [data.RunInstances, data.StartInstances, data.StopInstances, data.TerminateInstances],
+                labels: ['Run Instances', 'Start Instances', 'Stop Instances', 'Terminate Instances'],
+                type: 'pie'
+              };
+              var layout = {
+                title: 'EC2 Data',
+                height: 400
+              };
+              var data = [trace1];
+              Plotly.newPlot('pie-chart', data, layout);
+            }
+          });
+      }
+      
+      // Call the updatePieChart function every 30 seconds
+      setInterval(updatePieChart, 10000);
+
+
+
+      
+  </script>
+
+
+
+
+
+          <script>
+            // Set the expiration time of the session to 10 minutes from now
+            const expirationTime = new Date(Date.now() + 1 * 1000 * 1000);
+          
+            // Get the current time and calculate the time left until the session expires
+            const currentTime = new Date();
+            let timeLeft = Math.floor((expirationTime - currentTime) / 1000); // Convert to seconds
+          
+            // Set up a timeout to redirect the user to the logout page after the session expires
+            setTimeout(function() {
+              window.location.href = "{{ url_for('logout') }}";
+            }, timeLeft * 1000); // Convert back to milliseconds
+          
+            // Display the time left until the session expires
+            const timeLeftDiv = document.getElementById("time-left");
+          
+            function updateTimeLeft() {
+              const minutesLeft = Math.floor(timeLeft / 60);
+              const secondsLeft = timeLeft % 60;
+              timeLeftDiv.innerText = `Your session will expire in ${minutesLeft} minute(s) and ${secondsLeft} second(s)`;
+              timeLeft--;
+            }
+          
+            updateTimeLeft(); // Display initial time left
+          
+            // Update time left every second
+            setInterval(updateTimeLeft, 1000);
+          </script>
+
+<script>
+  window.addEventListener('beforeunload', function (event) {
+      event.preventDefault();
+      event.returnValue = '';
+  });
+</script>
+
+
+
+        <div class="row">
+  <div class="col-sm-6">
+    <h2 class="sub-header">Cloudtrail  <button id="generate-password" class="btn btn-default">Generate Temporary Password</button>
+      <button id="download-csv" class="btn btn-primary">Download CSV</button></h2>
+    
+  </div>
+
+
+
+
+
+
+
+
+  
+  
+  <div class="col-sm-6 text-right">
+    
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped table-responsive">
+    <thead>
+      <tr>
+        <th>Event ID</th>
+        <th>Event Name</th>
+        <th>Event Time</th>
+        <th>Event Detail</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in events %}
+      <tr>
+        <td>{{ event['event_id'] }}</td>
+        <td>{{ event['event_name'] }}</td>
+        <td>{{ event['event_time'] }}</td>
+        <td>{{ event['event_detail'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Get the button and table elements
+  const generateBtn = document.getElementById('generate-password');
+  const downloadBtn = document.getElementById('download-csv');
+  const table = document.querySelector('table');
+
+  let temporaryPassword = '';
+
+  // Add an event listener to the generate button to generate a temporary password
+  generateBtn.addEventListener('click', () => {
+    temporaryPassword = Math.random().toString(36).slice(-8);
+    alert(`Your temporary password is ${temporaryPassword}. This password is valid for one-time use only and will expire after use.`);
+  });
+
+  // Add an event listener to the download button to handle the download
+  downloadBtn.addEventListener('click', () => {
+    // Prompt the user for a password
+    const password = prompt('Please enter the download password:');
+
+    // Verify the password
+    if (password !== temporaryPassword) {
+      alert('Incorrect password!');
+      return;
+    }
+
+    // Get the table data as an array
+    const tableData = Array.from(table.querySelectorAll('tr')).map(row => {
+      return Array.from(row.querySelectorAll('td')).map(cell => cell.textContent);
+    });
+
+    // Convert the table data to CSV format
+    const csvData = tableData.map(row => row.join(',')).join('\n');
+
+    // Create a blob from the CSV data
+    const blob = new Blob([csvData], { type: 'text/csv' });
+
+    // Create a URL for the blob
+    const url = URL.createObjectURL(blob);
+
+    // Create a link element for the URL and click it to prompt the download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'data.csv';
+    link.click();
+
+    // Clean up the URL and link elements
+    URL.revokeObjectURL(url);
+    link.remove();
+  });
+</script>
+
+          
+{% endblock %}

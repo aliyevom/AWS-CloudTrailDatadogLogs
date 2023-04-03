@@ -1,0 +1,64 @@
+<div class="row">
+  <div class="col-md-4">
+    <form method="get">
+      <div class="form-group">
+        <label for="event-type">Filter by Event Type:</label>
+        <select class="form-control" id="event-type" name="event-type">
+          <option value="">All Events</option>
+          <option value="type1">Event Type 1</option>
+          <option value="type2">Event Type 2</option>
+          <option value="type3">Event Type 3</option>
+          <!-- add more options as needed -->
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped table-responsive">
+    <thead>
+      <tr>
+        <th>Event ID</th>
+        <th>Event Name</th>
+        <th>Event Time</th>
+        <th>Event Detail</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in events %}
+        {% if filtered_type is none or filtered_type == event['event_type'] %}
+          <tr>
+            <td>{{ event['event_id'] }}</td>
+            <td>{{ event['event_name'] }}</td>
+            <td>{{ event['event_time'] }}</td>
+            <td>{{ event['event_detail'] }}</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+---------------------------------------------------------------------------------------------\
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+@app.route('/dashboard')
+def dashboard():
+events = [
+{'event_id': 1, 'event_name': 'Event 1', 'event_time': '2022-01-01 10:00:00', 'event_detail': 'Details for Event 1',
+'event_type': 'type1'},
+{'event_id': 2, 'event_name': 'Event 2', 'event_time': '2022-01-02 11:00:00', 'event_detail': 'Details for Event 2',
+'event_type': 'type2'},
+{'event_id': 3, 'event_name': 'Event 3', 'event_time': '2022-01-03 12:00:00', 'event_detail': 'Details for Event 3',
+'event_type': 'type3'},
+# add more events as needed
+]
+
+filtered_type = request.args.get('event-type')
+if filtered_type:
+events = [event for event in events if event['event_type'] == filtered_type]
+
+return render_template('dashboard.html', events=events, filtered_type=filtered_type)

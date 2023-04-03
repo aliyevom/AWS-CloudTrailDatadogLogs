@@ -1,0 +1,89 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+KMS Graph
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<!-- Include Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<style>
+.graph-container {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0px 0px 5px #ccc;
+}
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="graph-container">
+                <div id="graph"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateGraph() {
+    // Make a request to the Flask route to get the KMS data
+    fetch('/kms_data')
+        .then(response => response.json())
+        .then(data => {
+            // Create the graph using Plotly.js
+            var trace1 = {
+                labels: data.keys,
+                values: data.encryption_counts,
+                type: 'pie',
+                marker: {
+                    colors: ['blue', 'green', 'red', 'yellow', 'orange']
+                }
+            };
+            var layout = {
+                title: 'KMS Encryption Counts',
+            };
+            var data = [trace1];
+            Plotly.newPlot('graph', data, layout);
+        });
+}
+
+fetch('/kms_data')
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        // Create the graph using Plotly.js
+        // ...
+    });
+
+
+function updateKeyRotationTimes() {
+    // Make a request to the Flask route to get the KMS data
+    fetch('/kms_data')
+        .then(response => response.json())
+        .then(data => {
+            // Create the key rotation times list
+            var keyRotationList = '';
+            data.key_rotation_times.forEach(function (time) {
+                keyRotationList += '<li>' + time + '</li>';
+            });
+            document.getElementById('key_rotation_times').innerHTML = keyRotationList;
+        });
+}
+
+// Call the updateGraph function every 10 seconds
+setInterval(updateGraph, 10000);
+
+// Call the updateKeyRotationTimes function every 10 seconds
+setInterval(updateKeyRotationTimes, 10000);
+</script>
+
+{% endblock %}

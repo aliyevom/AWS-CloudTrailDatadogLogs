@@ -1,0 +1,94 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+charts
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<!-- Include Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<style>
+  .logo-box {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: #ffffff;
+    padding: 10px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+    animation-name: box-shadow-color;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+  }
+  
+  @keyframes box-shadow-color {
+    0% {
+      box-shadow: 0px 0px 40px rgba(255, 1, 1, 0.3);
+    }
+    50% {
+      box-shadow: 0px 0px 20px rgba(10, 220, 192, 0.6);
+    }
+    100% {
+      box-shadow: 0px 0px 20px rgba(255, 0, 0, 0.3);
+    }
+  }
+  
+  .logo-box img {
+    height: 132px;
+    width: auto;
+  }
+  
+</style>
+{% endblock %}
+
+{% block content %}
+
+<body>
+
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div id="pie-chart"></div>
+      </div>
+      <div class="col-lg-4">
+        <div class="logo-box">
+          <img src="{{url_for('static', filename='pics/logo__4-removebg.png')}}" alt="Logo">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function updatePieChart() {
+      // Make a request to the Flask route to get the data
+      fetch('/sg_data')
+        .then(response => response.json())
+        .then(data => {
+          // Create the pie chart using Plotly.js
+          var trace1 = {
+            values: [data.sg_create_count, data.sg_delete_count, data.sg_modify_count],
+            labels: ['SG Create', 'SG Deleted', 'SG Modified'],
+            type: 'pie'
+          };
+          var layout = {
+            title: 'SG Data',
+            height: 400
+          };
+          var data = [trace1];
+          Plotly.newPlot('pie-chart', data, layout);
+        });
+    }
+
+    // Call the updatePieChart function every 10 seconds
+    setInterval(updatePieChart, 10000);
+    
+    // Call the updatePieChart function on page load
+    updatePieChart();
+  </script>
+
+</body>
+{% endblock %}

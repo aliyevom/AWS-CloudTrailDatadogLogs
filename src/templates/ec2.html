@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>EC2 Data</title>
+    <!-- Include Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <body>
+    <div id="pie-chart"></div>
+    <script>
+      function updatePieChart() {
+        // Make a request to the Flask route to get the data
+        fetch('/ec2_data')
+          .then(response => response.json())
+          .then(data => {
+            // Create the pie chart using Plotly.js
+            var trace1 = {
+              values: [data.RunInstances, data.StartInstances, data.StopInstances, data.TerminateInstances],
+              labels: ['Run Instances', 'Start Instances', 'Stop Instances', 'Terminate Instances'],
+              type: 'pie'
+            };
+            var layout = {
+              title: 'EC2 Data',
+              height: 400
+            };
+            var data = [trace1];
+            Plotly.newPlot('pie-chart', data, layout);
+          });
+      }
+      
+      // Call the updatePieChart function every 30 seconds
+      setInterval(updatePieChart, 10000);
+    </script>
+  </body>
+</html>

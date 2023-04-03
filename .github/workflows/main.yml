@@ -4,7 +4,7 @@ env:
   EB_PACKAGE_S3_BUCKET_NAME : "hawkincloud.flask-app"
   EB_APPLICATION_NAME       : "Hawkincloud"
   EB_ENVIRONMENT_NAME       : "Hawkincloud-env"
-  DEPLOY_PACKAGE_NAME       : "hawkincloud-app-$(( github.sha )).zip"
+  DEPLOY_PACKAGE_NAME       : "hawkincloud-app-${{ github.sha }}.zip"
   AWS_REGION_NAME           : "us-east-1"
 
 on: 
